@@ -27,6 +27,6 @@ def about():
 
 # function 'neuro'
 @app.post('/api/neuro/')
-def neuro(request: NeuroRequest):
-    return choa.neuro_finansist(request.user_id, request.note)
+async def neuro(request: NeuroRequest):
+    return await choa.neuro_finansist(request.user_id, request.note)
 
