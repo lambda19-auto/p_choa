@@ -13,8 +13,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile, BufferedInputFile
-from ..ai import ChoaAI
-from ..avatar import Avatar
+from ai import ChoaAI
+from avatar import Avatar
 
 load_dotenv()
 choa = ChoaAI()

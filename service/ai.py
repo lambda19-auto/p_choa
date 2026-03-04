@@ -3,11 +3,11 @@ from dotenv import load_dotenv
 from os import getenv
 
 from openai import AsyncOpenAI
-from api.core_and_router import Router
-from api.accounting import Accounting
-from api.ask import Ask
-from api.analyze import Analyze
-from api.joke import Joke
+from core_and_router import Router
+from accounting import Accounting
+from ask import Ask
+from analyze import Analyze
+from joke import Joke
 tracemalloc.start()
 
 

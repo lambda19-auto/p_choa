@@ -1,7 +1,7 @@
 '''
 agent Ask
 '''
-from api.core_and_router import Core
+from core_and_router import Core
 
 
 class Ask(Core):
