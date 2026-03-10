@@ -1,17 +1,17 @@
-# Секретные переменные
+# secrets
 .env
 
-# Кэш Python
+# cache python
 __pycache__/
 *.pyc
 
-# Виртуальное окружение
+# venv
 venv/
 .venv/
 
-# Логи
+# logs
 *.log
 
-# IDE файлы
+# IDE 
 .vscode/
 .idea/

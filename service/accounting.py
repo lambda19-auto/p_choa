@@ -160,7 +160,7 @@ class Accounting(Core):
             temperature = self.temperature_for_accounting, 
             verbose = self.verbose_for_accounting)
 
-    FILE_PATH = 'api/content/journal.csv'
+    FILE_PATH = 'telegram/content/journal.csv'
     
     async def load_df(self):
         try:

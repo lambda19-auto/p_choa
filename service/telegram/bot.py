@@ -31,7 +31,7 @@ async def command_start_handler(message: Message) -> None:
     '''
     This handler receives messages with `/start` command
     '''
-    await message.answer(f'Hello, {html.bold(message.from_user.full_name)}! \nМеня зовут 초아. Нажмите /help, чтобы узнать больше о моих способностях.')
+    await message.answer(f'Hello, {html.bold(message.from_user.full_name)}! \nМеня зовут 초아. Нажмите /help, чтобы узнать больше о моих способностях.') #type: ignore
 
 
 @dp.message(Command('help'))
@@ -39,7 +39,7 @@ async def cmd_help(message: Message) -> None:
     '''
     This handler receives messages with `/help` command
     '''
-    await message.answer('Список команд: \n/help - список команд;\n/about - обо мне и моих задачах;\n/d_journal - скачать журнал операции;\n/d_CFS - скачать ОДДС')
+    await message.answer('Список команд: \n/help - список команд;\n/about - обо мне и моих задачах;\n/doc_journal - скачать журнал операции;\n/doc_CFS - скачать ОДДС')
 
 
 @dp.message(Command('about'))
@@ -50,28 +50,28 @@ async def cmd_about(message: Message) -> None:
     await message.answer('Я нейро-финансист в торговой компании. В мои обязанности входит ведение журнала операции для ОДДС. А также написание аналитических записок по просьбам руководства')
 
 
-@dp.message(Command('d_journal'))
+@dp.message(Command('doc_journal'))
 async def cmd_download_journal(message: Message) -> None:
     '''
     This handler receives messages with `/d_journal` command
     '''
-    file_path = 'api/content/journal.csv'
+    file_path = 'telegram/content/journal.csv'
     document = FSInputFile(file_path)
 
-    await message.bot.send_document(chat_id=message.chat.id,
+    await message.bot.send_document(chat_id=message.chat.id, #type: ignore
                                     document=document,
-                                    caption='Журнал операции')
+                                    caption='Журнал операции') 
     os.remove(file_path)
 
-@dp.message(Command('d_CFS'))
+@dp.message(Command('doc_CFS'))
 async def cmd_download_cfs(message: Message) -> None:
     '''
     This handler receives messages with `/d_CFS` command
     '''
-    file_path = 'api/content/cfs.csv'
+    file_path = 'telegram/content/cfs.csv'
     document = FSInputFile(file_path)
 
-    await message.bot.send_document(chat_id=message.chat.id,
+    await message.bot.send_document(chat_id=message.chat.id, #type: ignore
                                     document=document,
                                     caption='Отчет о движении денежных средств')
 
@@ -80,7 +80,7 @@ async def text(message: Message) -> None:
     '''
     This handler receives messages with text
     '''
-    response = await choa.neuro_finansist(message.from_user.id, message.text)
+    response = await choa.neuro_finansist(message.from_user.id, message.text) #type: ignore
 
     if response['module'] == 'analyze':
         await message.answer('Идет подготовка ...')
@@ -88,14 +88,14 @@ async def text(message: Message) -> None:
         #
         video_file.seek(0)
         input_video = BufferedInputFile(video_file.read(), filename='video.mp4')
-        await message.bot.send_video(chat_id=message.chat.id, video=input_video)
+        await message.bot.send_video(chat_id=message.chat.id, video=input_video) #type: ignore
     else:
         await message.answer(response['text'])
 
 
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
-    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML)) #type: ignore
 
     # And the run events dispatching
     await dp.start_polling(bot)
