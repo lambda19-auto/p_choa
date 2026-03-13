@@ -8,7 +8,7 @@ from core_and_router import Core
 
 
 class Analyze(Core):
-    # прописываем роль, версию, температура модели
+    # write role, model, temperature
     system_for_analyze = '''
     Тебя зовут Пак Чхо А. Ты — великолепная сотрудница финансового отдела 
     торговой компании "Фэмили". Компания занимается реализацией одежды, 

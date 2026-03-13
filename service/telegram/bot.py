@@ -15,7 +15,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile, BufferedInputFile
 from ai import ChoaAI
 from avatar import Avatar
-
+from cfs_builder import CFS
 load_dotenv()
 choa = ChoaAI()
 avatar = Avatar()
@@ -63,17 +63,34 @@ async def cmd_download_journal(message: Message) -> None:
                                     caption='Журнал операции') 
     os.remove(file_path)
 
+# @dp.message(Command('doc_CFS'))
+# async def cmd_download_cfs(message: Message) -> None:
+#     '''
+#     This handler receives messages with `/d_CFS` command
+#     '''
+#     file_path = 'telegram/content/cfs.csv'
+#     document = FSInputFile(file_path)
+
+#     await message.bot.send_document(chat_id=message.chat.id, #type: ignore
+#                                     document=document,
+#                                     caption='Отчет о движении денежных средств')
+
 @dp.message(Command('doc_CFS'))
 async def cmd_download_cfs(message: Message) -> None:
     '''
-    This handler receives messages with `/d_CFS` command
+    This handler receives messages with `/d_CFS` command 
     '''
-    file_path = 'telegram/content/cfs.csv'
-    document = FSInputFile(file_path)
+    # rebuild CFS
+    cfs_agent = CFS()
+    await cfs_agent.build()
 
-    await message.bot.send_document(chat_id=message.chat.id, #type: ignore
-                                    document=document,
-                                    caption='Отчет о движении денежных средств')
+    # send file 
+    file_path = CFS.CFS_PATH
+    document = FSInputFile(file_path)
+    await message.bot.send_document( #type:ignore
+        chat_id=message.chat.id,  
+        document=document,
+        caption='Отчет о движении денежных средств')
 
 @dp.message()
 async def text(message: Message) -> None:

@@ -11,7 +11,7 @@ from joke import Joke
 tracemalloc.start()
 
 
-# создаем класс ChoaAI
+# create class ChoaAI
 class ChoaAI():
 
     def __init__(self):
@@ -20,7 +20,7 @@ class ChoaAI():
         self.client = AsyncOpenAI(api_key=OPEN_AI_API_KEY)
         self.user_context = {}
 
-    # метод вызова нейро-финансиста
+    # method ai-finance
     async def neuro_finansist(self, user_id: int, note: str):
         if user_id not in self.user_context:
             self.user_context[user_id] = ''

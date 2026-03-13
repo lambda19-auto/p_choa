@@ -8,9 +8,9 @@ import pandas as pd
 from core_and_router import Core
 
 
-# создаем class accounting
+# create class accounting
 class Accounting(Core):
-    # прописываем роль модели для заполнения таблицы, версию и температуру
+    # write role, model, temperature
     system_for_accounting = '''
     Ты — великолепный сотрудник финансового отдела торговой компании 'Фэмили'. Компания 
     занимается реализацией одежды, игрушек и закусками.  У тебя отлично получается извлекать 
@@ -148,7 +148,7 @@ class Accounting(Core):
     temperature_for_accounting = 0
     verbose_for_accounting = 0 
 
-    # конструктор
+    # consturct
     def __init__(self, note, summary, client):
         self.note = note
         self.summary = summary
@@ -185,7 +185,7 @@ class Accounting(Core):
         }
         await self.save_df(df)
 
-    # функция активации
+    # method activate
     async def activate(self):
         df = await self.load_df()
 
@@ -243,7 +243,6 @@ class Accounting(Core):
         if self.verbose:
             print('\n accounting: \n', answer)
 
-        # обработчик ошибок
         try:
             result = ast.literal_eval(answer)
             if not isinstance(result, list):
@@ -251,16 +250,13 @@ class Accounting(Core):
         except (ValueError, SyntaxError):
             result = 'Error - accounting can not convert'
 
-        # значения флага по умолчанию
+        # flag 
         was_written_to_sheet = False
 
-        # условие по определению полноты данных, если все данные получены происходит
-        # запись данных в таблицу
+        # check list
         if result.count('-') == 0:
-            # добавляем в контекст в заметку
             self.summary += self.note
             await self.append_to_df(result, self.summary)
-            # изменяем значение флага
             was_written_to_sheet = True
 
         return result, was_written_to_sheet

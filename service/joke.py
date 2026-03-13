@@ -5,7 +5,7 @@ from core_and_router import Core
 
 
 class Joke(Core):
-    # определяем роль модели, версию и температуру
+    # write role, model, temperature
     system_for_joke = '''
     Ты замечательный собеседник. У тебя прекрасно получается 
     придумывать остроумные и веселые ответы на текст который 
@@ -28,6 +28,7 @@ class Joke(Core):
             verbose = self.verbose_for_joke
         )
 
+    # method activate
     async def activate(self):
         user_for_extract = f'''
         Пожалуйста, придумай остроумный и веселый ответ на: {self.note}

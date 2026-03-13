@@ -8,6 +8,7 @@ from io import BytesIO
 from dotenv import load_dotenv
 
 
+# create class ChoaAI
 class Avatar:
 
     def __init__(self):
@@ -22,7 +23,7 @@ class Avatar:
 
     async def create_video(self, text: str) -> BytesIO:
         """
-        Генерируем видео по тексту и возвращаем BytesIO для Telegram
+        generate video and return 
         """
         timeout = httpx.Timeout(
             connect=10.0,
@@ -31,7 +32,7 @@ class Avatar:
             pool=60.0
         )
 
-        # Шаг 1: generate
+        # step 1: generate
         async with httpx.AsyncClient(timeout=timeout) as client:
             payload = {
                 'video_inputs': [
@@ -68,9 +69,9 @@ class Avatar:
             if not video_id:
                 raise Exception(f"Video ID not found in response: {data}")
 
-        # Шаг 2: опрашиваем статус
+        # step 2: status
         max_attempts = 60
-        sleep_seconds = 60  # немного меньше, чтобы быстрее реагировать
+        sleep_seconds = 60
 
         video_url = None
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -96,7 +97,7 @@ class Avatar:
             else:
                 raise Exception("Video was not generated in time")
 
-        # Шаг 3: скачиваем видео в BytesIO
+        # step 3: download video BytesIO
         async with httpx.AsyncClient(timeout=httpx.Timeout(120.0)) as client:
             r = await client.get(video_url)
             if r.status_code != 200:
@@ -105,5 +106,3 @@ class Avatar:
             video_file.name = f'video_{video_id}.mp4'
 
         return video_file
-
-

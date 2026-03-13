@@ -5,7 +5,7 @@ from core_and_router import Core
 
 
 class Ask(Core):
-
+    # write role, model, temperature
     system_for_ask = '''
     Ты — великолепный сотрудник финансового отдела торговой компании 'Фэмили'. Компания 
     занимается реализацией одежды, игрушек и закусками. У тебя прекрасно
@@ -20,12 +20,10 @@ class Ask(Core):
     '''
 
     model_for_ask = 'gpt-4.1-nano-2025-04-14'
-
     temperature_for_ask = 0
-
     verbose_for_ask = 0 
 
-    # конструктор
+    # construct
     def __init__(self, note, client):
         self.note = note
         self.client = client
@@ -37,7 +35,7 @@ class Ask(Core):
             verbose = self.verbose_for_ask
         )
 
-    # функция активатор
+    # method activate
     async def activate(self):
         user_for_ask = f'''
         Пожалуйста, ознакомся со списком {self.note}. \n\n

@@ -1,7 +1,7 @@
 '''
 base class and agent Router
 '''
-# создаем базовый класс для остальных
+# create core for other classes
 class Core:
 
     # конструктор для данных
@@ -12,9 +12,9 @@ class Core:
         self.verbose = verbose
 
 
-# создаем class router
+# create class router
 class Router(Core):
-    # определяем роль, версию и температуру модели для router
+    # write role, model, temperature
     system_for_router = '''
     Ты — великолепный сотрудник финансового отдела торговой компании "Фэмили". 
     Компания занимается реализацией одежды, игрушек и закусками. У тебя 
@@ -38,13 +38,12 @@ class Router(Core):
     verbose_for_router = 0
 
 
-    # собираем все данные
+    # constuct
     def __init__(self, note, summary, client):
         self.note = note
         self.summary = summary
         self.client = client
 
-        # запрашиваем данные у родительского класса
         super().__init__(
             system = self.system_for_router,
             model = self.model_for_router,
@@ -53,7 +52,7 @@ class Router(Core):
         )
 
 
-    # пишем функцию активации
+    # mehod activate
     async def activate(self):
         user_for_router = f'''
         Пожалуйста, давай действовать последовательно: \n
