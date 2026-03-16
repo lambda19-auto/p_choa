@@ -15,7 +15,8 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile, BufferedInputFile
 from ai import ChoaAI
 from avatar import Avatar
-from cfs_builder import CFS
+from cfs import CFS
+
 load_dotenv()
 choa = ChoaAI()
 avatar = Avatar()

@@ -37,14 +37,22 @@
 * Python 3.13+
 * `uv`
 
+#### Клонируем репозиторий
+
 ```bash
-git clone https://github.com/Rodion-AI/p_choa.git
-cd p_choa
+git clone https://github.com/lambda19-auto/p_choa.git
+```
 
+#### Создание и активация виртуального окружения
+
+```bash
 uv venv
-source .venv/bin/activate.fish  # Linux / macOS
-# .venv\Scripts\activate   # Windows
+source .venv/bin/activate.fish
+```
 
+#### Установка зависимостей
+
+```bash
 uv sync
 ```
 
@@ -69,7 +77,7 @@ HEYGEN_API_KEY=
 * OpenAI
 * HeyGen
 
-После настройки запустите:
+#### Запуск
 
 ```bash
 cd service
@@ -86,11 +94,12 @@ Docker-образ доступен на Docker Hub.
 
 ```bash
 docker run -d \
-  -e OPENAI_API_KEY=your_key \
-  -e BOT_TOKEN=your_token \
-  -e HEYGEN_API_KEY=your_key \
+  --name choa-bot \
   --restart unless-stopped \
-  your-docker-image-name
+  -e OPENAI_API_KEY=your_key \
+  -e tg_token=your_token \
+  -e HEYGEN_API_KEY=your_token \
+  lambda19main/p_choa:latest
 ```
 
 ---
