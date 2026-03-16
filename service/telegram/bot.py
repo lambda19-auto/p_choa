@@ -40,7 +40,7 @@ async def cmd_help(message: Message) -> None:
     '''
     This handler receives messages with `/help` command
     '''
-    await message.answer('Список команд: \n/help - список команд;\n/about - обо мне и моих задачах;\n/doc_journal - скачать журнал операции;\n/doc_CFS - скачать ОДДС')
+    await message.answer('Список команд: \n/help - список команд;\n/about - обо мне и моих задачах;\n/journal - скачать журнал операции;\n/cfs - скачать ОДДС.')
 
 
 @dp.message(Command('about'))
@@ -51,7 +51,7 @@ async def cmd_about(message: Message) -> None:
     await message.answer('Я нейро-финансист в торговой компании. В мои обязанности входит ведение журнала операции для ОДДС. А также написание аналитических записок по просьбам руководства')
 
 
-@dp.message(Command('doc_journal'))
+@dp.message(Command('journal'))
 async def cmd_download_journal(message: Message) -> None:
     '''
     This handler receives messages with `/d_journal` command
@@ -76,7 +76,7 @@ async def cmd_download_journal(message: Message) -> None:
 #                                     document=document,
 #                                     caption='Отчет о движении денежных средств')
 
-@dp.message(Command('doc_CFS'))
+@dp.message(Command('CFS'))
 async def cmd_download_cfs(message: Message) -> None:
     '''
     This handler receives messages with `/d_CFS` command 
