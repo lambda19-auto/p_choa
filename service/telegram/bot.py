@@ -120,6 +120,8 @@ async def text(message: Message) -> None:
                     "📄 Вот текст ответа:\n\n"
                     f"{response['text']}"
                 )
+    else:
+        await message.answer(response['text'])
 
 
 async def main() -> None:
