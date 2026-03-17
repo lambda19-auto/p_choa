@@ -61,22 +61,10 @@ async def cmd_download_journal(message: Message) -> None:
 
     await message.bot.send_document(chat_id=message.chat.id, #type: ignore
                                     document=document,
-                                    caption='Журнал операции') 
-    os.remove(file_path)
+                                    caption='Журнал операции')
 
-# @dp.message(Command('doc_CFS'))
-# async def cmd_download_cfs(message: Message) -> None:
-#     '''
-#     This handler receives messages with `/d_CFS` command
-#     '''
-#     file_path = 'telegram/content/cfs.csv'
-#     document = FSInputFile(file_path)
 
-#     await message.bot.send_document(chat_id=message.chat.id, #type: ignore
-#                                     document=document,
-#                                     caption='Отчет о движении денежных средств')
-
-@dp.message(Command('CFS'))
+@dp.message(Command('cfs'))
 async def cmd_download_cfs(message: Message) -> None:
     '''
     This handler receives messages with `/d_CFS` command 
@@ -102,13 +90,36 @@ async def text(message: Message) -> None:
 
     if response['module'] == 'analyze':
         await message.answer('Идет подготовка ...')
-        video_file = await avatar.create_video(response['text'])
-        #
-        video_file.seek(0)
-        input_video = BufferedInputFile(video_file.read(), filename='video.mp4')
-        await message.bot.send_video(chat_id=message.chat.id, video=input_video) #type: ignore
-    else:
-        await message.answer(response['text'])
+
+        try:
+            video_file = await avatar.create_video(response['text'])
+
+            video_file.seek(0)
+            input_video = BufferedInputFile(video_file.read(), filename='video.mp4')
+
+            await message.bot.send_video( #type: ignore
+                chat_id=message.chat.id,
+                video=input_video
+            )
+
+        except Exception as e:
+            error_text = str(e)
+
+            # 💸 нет кредитов HeyGen
+            if "Insufficient credit" in error_text:
+                await message.answer(
+                    "⚠️ Видео сейчас недоступно (закончились кредиты).\n"
+                    "Но я всё равно подготовила ответ:\n\n"
+                    f"{response['text']}"
+                )
+
+            # ❌ любая другая ошибка
+            else:
+                await message.answer(
+                    "😔 Не удалось сгенерировать видео.\n\n"
+                    "📄 Вот текст ответа:\n\n"
+                    f"{response['text']}"
+                )
 
 
 async def main() -> None:

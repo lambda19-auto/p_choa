@@ -44,7 +44,7 @@ class CFS:
             return
 
         # group by category
-        grouped = df.groupby('category')['sum'].sum().to_dict()
+        grouped = df.groupby('category')['sum'].sum().to_dict() #type: ignore
 
         template_lines = []
 
@@ -74,7 +74,6 @@ class CFS:
 
                 else:
 
-                    # если категории нет в журнале → ставим 0
                     updated_lines.append([original_name, "0,00"])
 
             else:

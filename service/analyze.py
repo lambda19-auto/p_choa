@@ -40,7 +40,7 @@ class Analyze(Core):
             verbose = self.verbose_for_analyze
         )
 
-    FILE_PATH = 'api/content/cfs.csv'
+    FILE_PATH = 'telegram/content/cfs.csv'
 
     async def load_sheet(self):
         try:
