@@ -1,13 +1,21 @@
 import tracemalloc
-from dotenv import load_dotenv
 from os import getenv
 
+from dotenv import load_dotenv
 from openai import AsyncOpenAI
-from core_and_router import Router
-from accounting import Accounting
-from ask import Ask
-from analyze import Analyze
-from joke import Joke
+
+try:
+    from .accounting import Accounting
+    from .analyze import Analyze
+    from .ask import Ask
+    from .core_and_router import Router
+    from .joke import Joke
+except ImportError:
+    from accounting import Accounting
+    from analyze import Analyze
+    from ask import Ask
+    from core_and_router import Router
+    from joke import Joke
 tracemalloc.start()
 
 

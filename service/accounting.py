@@ -3,9 +3,14 @@ agent Accounting
 '''
 import ast
 import asyncio
+from pathlib import Path
+
 import pandas as pd
 
-from core_and_router import Core
+try:
+    from .core_and_router import Core
+except ImportError:
+    from core_and_router import Core
 
 
 # create class accounting
@@ -160,12 +165,13 @@ class Accounting(Core):
             temperature = self.temperature_for_accounting, 
             verbose = self.verbose_for_accounting)
 
-    FILE_PATH = 'telegram/content/journal.csv'
+    BASE_DIR = Path(__file__).resolve().parent
+    FILE_PATH = BASE_DIR / 'telegram' / 'content' / 'journal.csv'
     
     async def load_df(self):
         try:
             return await asyncio.to_thread(pd.read_csv, self.FILE_PATH)
-        except:
+        except Exception:
             return pd.DataFrame(columns=['note', 'date', 'sum', 'account', 
                                          'counterparty', 'category'])
 
