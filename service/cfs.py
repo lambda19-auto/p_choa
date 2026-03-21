@@ -1,7 +1,3 @@
-'''
-script for build CFS (Cash Flow Statement)
-'''
-
 import asyncio
 import pandas as pd
 import csv
@@ -20,66 +16,64 @@ class CFS:
             return pd.DataFrame()
 
     def normalize_category(self, text: str):
-        """
-        delete number
-        """
+        """Удаляет номера категорий в начале строки"""
         return re.sub(r'^\d+(\.\d+)*\.\s*', '', text).strip()
 
     def format_money(self, value: float):
-        """
-        add format
-        """
+        """Форматирует число в строку с пробелами и запятыми, добавляет скобки для отрицательных"""
         abs_value = f"{abs(value):,.2f}".replace(',', ' ').replace('.', ',')
-
-        if value < 0:
-            return f"({abs_value})"
-
-        return abs_value
+        return f"({abs_value})" if value < 0 else abs_value
 
     async def build(self):
-
         df = await self.load_journal()
-
         if df.empty:
             return
 
-        # group by category
-        grouped = df.groupby('category')['sum'].sum().to_dict() #type: ignore
+        # агрегируем суммы по категориям из журнала
+        grouped = df.groupby('category')['sum'].sum().to_dict()  # type: ignore
 
+        # читаем шаблон cfs.csv
         template_lines = []
-
-        # read cfs.csv
         with open(self.CFS_PATH, newline='', encoding='utf-8') as f:
             reader = csv.reader(f)
-
             for row in reader:
                 template_lines.append(row)
 
         updated_lines = []
 
+        # для хранения суммы по текущей группе
+        group_sums = {}
+        current_group_name = None
+        temp_sum = 0
+
         for row in template_lines:
-
             if len(row) >= 2:
-
                 original_name = row[0].strip()
                 clean_name = self.normalize_category(original_name)
 
-                if clean_name in grouped:
+                # проверка — строка это группа или подкатегория
+                is_group = re.match(r'^\d+\.\s', original_name) and not re.match(r'^\d+\.\d+', original_name)
 
-                    value = grouped[clean_name]
+                if is_group:
+                    # если была предыдущая группа, записываем её сумму
+                    if current_group_name is not None:
+                        updated_lines.append([current_group_name, self.format_money(temp_sum)])
+                    current_group_name = original_name
+                    temp_sum = 0
+                    continue
 
-                    value_str = self.format_money(value)
-
-                    updated_lines.append([original_name, value_str])
-
-                else:
-
-                    updated_lines.append([original_name, "0,00"])
-
+                # сумма подкатегории из журнала
+                value = grouped.get(clean_name, 0)
+                temp_sum += value
+                updated_lines.append([original_name, self.format_money(value)])
             else:
                 updated_lines.append(row)
 
-        # rewrite file
+        # записываем последнюю группу
+        if current_group_name is not None:
+            updated_lines.append([current_group_name, self.format_money(temp_sum)])
+
+        # записываем результат в файл
         with open(self.CFS_PATH, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerows(updated_lines)
