@@ -1,7 +1,10 @@
 '''
 agent Ask
 '''
-from core_and_router import Core
+try:
+    from .core_and_router import Core
+except ImportError:
+    from core_and_router import Core
 
 
 class Ask(Core):

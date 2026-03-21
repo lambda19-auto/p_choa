@@ -2,9 +2,14 @@
 agent Analyze
 '''
 import asyncio
+from pathlib import Path
+
 import pandas as pd
 
-from core_and_router import Core
+try:
+    from .core_and_router import Core
+except ImportError:
+    from core_and_router import Core
 
 
 class Analyze(Core):
@@ -40,12 +45,13 @@ class Analyze(Core):
             verbose = self.verbose_for_analyze
         )
 
-    FILE_PATH = 'telegram/content/cfs.csv'
+    BASE_DIR = Path(__file__).resolve().parent
+    FILE_PATH = BASE_DIR / 'telegram' / 'content' / 'cfs.csv'
 
     async def load_sheet(self):
         try:
             return await asyncio.to_thread(pd.read_csv, self.FILE_PATH)
-        except:
+        except Exception:
             return pd.DataFrame()
 
     async def activate(self):
