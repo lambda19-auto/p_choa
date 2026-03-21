@@ -4,8 +4,9 @@ Telegram-bot for neuro-finance
 import asyncio
 import logging
 import sys
-import os
 from os import getenv
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, html
@@ -13,26 +14,35 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile, BufferedInputFile
-from ai import ChoaAI
-from avatar import Avatar
-from cfs import CFS
+
+try:
+    from ..ai import ChoaAI
+    from ..avatar import Avatar
+    from ..cfs import CFS
+except ImportError:
+    from ai import ChoaAI
+    from avatar import Avatar
+    from cfs import CFS
 
 load_dotenv()
 choa = ChoaAI()
 avatar = Avatar()
+BASE_DIR = Path(__file__).resolve().parent
+CONTENT_DIR = BASE_DIR / 'content'
 
 # Bot token can be obtained via https://t.me/BotFather
 TOKEN = getenv("BOT_TOKEN")
 
-# All handlers should be attached to the Router (or Dispatcher) 
+# All handlers should be attached to the Router (or Dispatcher)
 dp = Dispatcher()
+
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     '''
     This handler receives messages with `/start` command
     '''
-    await message.answer(f'Hello, {html.bold(message.from_user.full_name)}! \nМеня зовут 초아. Нажмите /help, чтобы узнать больше о моих способностях.') #type: ignore
+    await message.answer(f'Hello, {html.bold(message.from_user.full_name)}! \nМеня зовут 초아. Нажмите /help, чтобы узнать больше о моих способностях.')  # type: ignore
 
 
 @dp.message(Command('help'))
@@ -56,10 +66,10 @@ async def cmd_download_journal(message: Message) -> None:
     '''
     This handler receives messages with `/d_journal` command
     '''
-    file_path = 'telegram/content/journal.csv'
+    file_path = CONTENT_DIR / 'journal.csv'
     document = FSInputFile(file_path)
 
-    await message.bot.send_document(chat_id=message.chat.id, #type: ignore
+    await message.bot.send_document(chat_id=message.chat.id,  # type: ignore
                                     document=document,
                                     caption='Журнал операции')
 
@@ -67,26 +77,26 @@ async def cmd_download_journal(message: Message) -> None:
 @dp.message(Command('cfs'))
 async def cmd_download_cfs(message: Message) -> None:
     '''
-    This handler receives messages with `/d_CFS` command 
+    This handler receives messages with `/d_CFS` command
     '''
     # rebuild CFS
     cfs_agent = CFS()
     await cfs_agent.build()
 
-    # send file 
-    file_path = CFS.CFS_PATH
-    document = FSInputFile(file_path)
-    await message.bot.send_document( #type:ignore
-        chat_id=message.chat.id,  
+    # send file
+    document = FSInputFile(CFS.CFS_PATH)
+    await message.bot.send_document(  # type:ignore
+        chat_id=message.chat.id,
         document=document,
         caption='Отчет о движении денежных средств')
+
 
 @dp.message()
 async def text(message: Message) -> None:
     '''
     This handler receives messages with text
     '''
-    response = await choa.neuro_finansist(message.from_user.id, message.text) #type: ignore
+    response = await choa.neuro_finansist(message.from_user.id, message.text)  # type: ignore
 
     if response['module'] == 'analyze':
         await message.answer('Идет подготовка ...')
@@ -97,7 +107,7 @@ async def text(message: Message) -> None:
             video_file.seek(0)
             input_video = BufferedInputFile(video_file.read(), filename='video.mp4')
 
-            await message.bot.send_video( #type: ignore
+            await message.bot.send_video(  # type: ignore
                 chat_id=message.chat.id,
                 video=input_video
             )
@@ -126,7 +136,7 @@ async def text(message: Message) -> None:
 
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
-    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML)) #type: ignore
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))  # type: ignore
 
     # And the run events dispatching
     await dp.start_polling(bot)

@@ -1,18 +1,21 @@
 import asyncio
-import pandas as pd
 import csv
+from pathlib import Path
 import re
+
+import pandas as pd
 
 
 class CFS:
 
-    JOURNAL_PATH = 'telegram/content/journal.csv'
-    CFS_PATH = 'telegram/content/cfs.csv'
+    BASE_DIR = Path(__file__).resolve().parent
+    JOURNAL_PATH = BASE_DIR / 'telegram' / 'content' / 'journal.csv'
+    CFS_PATH = BASE_DIR / 'telegram' / 'content' / 'cfs.csv'
 
     async def load_journal(self):
         try:
             return await asyncio.to_thread(pd.read_csv, self.JOURNAL_PATH)
-        except:
+        except Exception:
             return pd.DataFrame()
 
     def normalize_category(self, text: str):
@@ -34,7 +37,7 @@ class CFS:
 
         # читаем шаблон cfs.csv
         template_lines = []
-        with open(self.CFS_PATH, newline='', encoding='utf-8') as f:
+        with self.CFS_PATH.open(newline='', encoding='utf-8') as f:
             reader = csv.reader(f)
             for row in reader:
                 template_lines.append(row)
@@ -42,7 +45,6 @@ class CFS:
         updated_lines = []
 
         # для хранения суммы по текущей группе
-        group_sums = {}
         current_group_name = None
         temp_sum = 0
 
@@ -74,6 +76,6 @@ class CFS:
             updated_lines.append([current_group_name, self.format_money(temp_sum)])
 
         # записываем результат в файл
-        with open(self.CFS_PATH, 'w', newline='', encoding='utf-8') as f:
+        with self.CFS_PATH.open('w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerows(updated_lines)
