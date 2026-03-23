@@ -8,4 +8,4 @@ COPY . .
 
 RUN uv sync
 
-CMD [".venv/bin/python", "service/telegram/bot.py"]
+CMD [".venv/bin/python", "-m", "service.telegram.bot"]
