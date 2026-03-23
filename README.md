@@ -97,7 +97,7 @@ docker run -d \
   --name choa-bot \
   --restart unless-stopped \
   -e OPENAI_API_KEY=your_key \
-  -e tg_token=your_token \
+  -e BOT_TOKEN=your_token \
   -e HEYGEN_API_KEY=your_token \
   lambda19main/p_choa:latest
 ```
