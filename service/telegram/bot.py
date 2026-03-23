@@ -16,10 +16,12 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile, BufferedInputFile
 
 try:
+    from .daily_limit import DailyRequestLimiter
     from ..ai import ChoaAI
     from ..avatar import Avatar
     from ..cfs import CFS
 except ImportError:
+    from daily_limit import DailyRequestLimiter
     from ai import ChoaAI
     from avatar import Avatar
     from cfs import CFS
@@ -29,6 +31,8 @@ choa = ChoaAI()
 avatar = Avatar()
 BASE_DIR = Path(__file__).resolve().parent
 CONTENT_DIR = BASE_DIR / 'content'
+DAILY_LIMIT = 10
+DAILY_LIMITER = DailyRequestLimiter(CONTENT_DIR / 'daily_limits.json', daily_limit=DAILY_LIMIT)
 
 # Bot token can be obtained via https://t.me/BotFather
 TOKEN = getenv("BOT_TOKEN")
@@ -37,8 +41,22 @@ TOKEN = getenv("BOT_TOKEN")
 dp = Dispatcher()
 
 
+async def check_daily_limit(message: Message) -> bool:
+    """Check and enforce the per-user daily request limit."""
+    if not await DAILY_LIMITER.allow_request(message.from_user.id):  # type: ignore[arg-type]
+        await message.answer(
+            f'⚠️ Достигнут лимит — {DAILY_LIMIT} запросов в сутки. Попробуйте снова завтра.'
+        )
+        return False
+
+    return True
+
+
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
+    if not await check_daily_limit(message):
+        return
+
     '''
     This handler receives messages with `/start` command
     '''
@@ -47,6 +65,9 @@ async def command_start_handler(message: Message) -> None:
 
 @dp.message(Command('help'))
 async def cmd_help(message: Message) -> None:
+    if not await check_daily_limit(message):
+        return
+
     '''
     This handler receives messages with `/help` command
     '''
@@ -55,6 +76,9 @@ async def cmd_help(message: Message) -> None:
 
 @dp.message(Command('about'))
 async def cmd_about(message: Message) -> None:
+    if not await check_daily_limit(message):
+        return
+
     '''
     This handler receives messages with `/about` command
     '''
@@ -63,6 +87,9 @@ async def cmd_about(message: Message) -> None:
 
 @dp.message(Command('journal'))
 async def cmd_download_journal(message: Message) -> None:
+    if not await check_daily_limit(message):
+        return
+
     '''
     This handler receives messages with `/d_journal` command
     '''
@@ -76,6 +103,9 @@ async def cmd_download_journal(message: Message) -> None:
 
 @dp.message(Command('cfs'))
 async def cmd_download_cfs(message: Message) -> None:
+    if not await check_daily_limit(message):
+        return
+
     '''
     This handler receives messages with `/d_CFS` command
     '''
@@ -93,6 +123,9 @@ async def cmd_download_cfs(message: Message) -> None:
 
 @dp.message()
 async def text(message: Message) -> None:
+    if not await check_daily_limit(message):
+        return
+
     '''
     This handler receives messages with text
     '''
