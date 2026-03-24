@@ -90,6 +90,11 @@ python3 -m telegram.bot
 
 Docker-образ доступен на Docker Hub.
 
+Загрузка образа:
+
+```bash
+docker pull lambda19main/p_choa:latest
+```
 Пример запуска:
 
 ```bash
