@@ -9,8 +9,13 @@ import pandas as pd
 
 try:
     from .core_and_router import Core
+    from .logging_setup import get_logger
 except ImportError:
     from core_and_router import Core
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
 
 
 # create class accounting
@@ -247,7 +252,7 @@ class Accounting(Core):
         answer = completion.choices[0].message.content
 
         if self.verbose:
-            print('\n accounting: \n', answer)
+            logger.info("accounting: %s", answer)
 
         try:
             result = ast.literal_eval(answer)

@@ -8,8 +8,13 @@ import pandas as pd
 
 try:
     from .core_and_router import Core
+    from .logging_setup import get_logger
 except ImportError:
     from core_and_router import Core
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Analyze(Core):
@@ -86,6 +91,6 @@ class Analyze(Core):
         answer = completion.choices[0].message.content
 
         if self.verbose:
-            print('\n analyze: \n', answer)
+            logger.info("analyze: %s", answer)
 
         return answer
