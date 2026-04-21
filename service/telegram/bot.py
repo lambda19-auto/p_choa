@@ -2,8 +2,6 @@
 Telegram-bot for neuro-finance
 '''
 import asyncio
-import logging
-import sys
 from os import getenv
 from pathlib import Path
 
@@ -19,10 +17,15 @@ try:
     from ..ai import ChoaAI
     from ..avatar import Avatar
     from ..cfs import CFS
+    from ..logging_setup import get_logger, setup_logging
 except ImportError:
     from ai import ChoaAI
     from avatar import Avatar
     from cfs import CFS
+    from logging_setup import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 load_dotenv()
 choa = ChoaAI()
@@ -114,6 +117,7 @@ async def text(message: Message) -> None:
 
         except Exception as e:
             error_text = str(e)
+            logger.exception("Ошибка генерации видео: %s", error_text)
 
             # 💸 нет кредитов HeyGen
             if "Insufficient credit" in error_text:
@@ -143,5 +147,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    logger.info("Bot is starting...")
     asyncio.run(main())

@@ -1,6 +1,15 @@
 '''
 base class and agent Router
 '''
+try:
+    from .logging_setup import get_logger
+except ImportError:
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
+
+
 # create core for other classes
 class Core:
 
@@ -79,6 +88,6 @@ class Router(Core):
         answer = completion.choices[0].message.content
 
         if self.verbose:
-            print('\n router: \n', answer)
+            logger.info("router: %s", answer)
 
         return answer
