@@ -24,7 +24,6 @@ except ImportError:
     from cfs import CFS
     from logging_setup import get_logger, setup_logging
 
-setup_logging()
 logger = get_logger(__name__)
 
 load_dotenv()
@@ -139,6 +138,8 @@ async def text(message: Message) -> None:
 
 
 async def main() -> None:
+    setup_logging()
+
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))  # type: ignore
 
@@ -147,5 +148,6 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    setup_logging()
     logger.info("Bot is starting...")
     asyncio.run(main())

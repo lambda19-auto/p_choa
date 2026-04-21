@@ -14,14 +14,19 @@ ERROR_LOGS_PATH = LOG_DIR / "errors.log"
 
 def setup_logging() -> None:
     """
-    Configure root logger:
-    - all records -> logs/all.log
-    - errors only -> logs/errors.log
+    Configure root logger file handlers:
+    - INFO+ records -> logs/all.log
+    - ERROR+ records -> logs/errors.log
+
+    By default, Python root logger starts at WARNING. When no handlers are
+    configured yet and the level is still default WARNING, raise it to INFO so
+    logs/all.log receives INFO records. Explicitly configured stricter levels
+    (e.g. ERROR) are preserved.
     """
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     root_logger = logging.getLogger()
-    if root_logger.level > logging.INFO:
+    if root_logger.level == logging.WARNING and not root_logger.handlers:
         root_logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
@@ -48,5 +53,4 @@ def setup_logging() -> None:
 
 
 def get_logger(name: str) -> logging.Logger:
-    setup_logging()
     return logging.getLogger(name)
