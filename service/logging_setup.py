@@ -14,15 +14,16 @@ ERROR_LOGS_PATH = LOG_DIR / "errors.log"
 
 def setup_logging() -> None:
     """
-    Configure root logger:
-    - all records -> logs/all.log
-    - errors only -> logs/errors.log
+    Configure root logger file handlers:
+    - INFO+ records -> logs/all.log
+    - ERROR+ records -> logs/errors.log
+
+    This function intentionally does not modify the root logger level,
+    preserving caller-configured logging policy.
     """
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     root_logger = logging.getLogger()
-    if root_logger.level > logging.INFO:
-        root_logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
@@ -48,5 +49,4 @@ def setup_logging() -> None:
 
 
 def get_logger(name: str) -> logging.Logger:
-    setup_logging()
     return logging.getLogger(name)
