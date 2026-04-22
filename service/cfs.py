@@ -4,6 +4,12 @@ from pathlib import Path
 import re
 
 import pandas as pd
+from pandas import DataFrame
+
+try:
+    from .google_sheets import GoogleSheetsStorage
+except ImportError:
+    from google_sheets import GoogleSheetsStorage
 
 
 class CFS:
@@ -110,6 +116,24 @@ class CFS:
     }
 
     async def load_journal(self):
+        # first preference: Google Sheets journal if configured
+        try:
+            sheets = GoogleSheetsStorage()
+            if sheets.is_configured:
+                rows = await asyncio.to_thread(sheets.load_journal_rows)
+                if rows:
+                    header = rows[0]
+                    body = rows[1:] if len(rows) > 1 else []
+                    expected_columns = ['note', 'date', 'sum', 'account', 'counterparty', 'category']
+                    if set(expected_columns).issubset(set(header)):
+                        frame = DataFrame(body, columns=header)
+                        for col in expected_columns:
+                            if col not in frame.columns:
+                                frame[col] = ''
+                        return frame[expected_columns]
+        except Exception:
+            pass
+
         try:
             return await asyncio.to_thread(pd.read_csv, self.JOURNAL_PATH)
         except Exception:
@@ -205,3 +229,11 @@ class CFS:
         with self.CFS_PATH.open('w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerows(rows)
+
+        # best-effort sync CFS report to Google Sheets
+        try:
+            sheets = GoogleSheetsStorage()
+            if sheets.is_configured:
+                await asyncio.to_thread(sheets.replace_cfs_rows, rows)
+        except Exception:
+            pass
