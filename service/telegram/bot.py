@@ -173,12 +173,12 @@ async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
     app = web.Application()
+    setup_application(app, dp, bot=bot)
     SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
         secret_token=WEBHOOK_SECRET_TOKEN,
     ).register(app, path=WEBHOOK_PATH)
-    setup_application(app, dp, bot=bot)
 
     runner = web.AppRunner(app)
     await runner.setup()
