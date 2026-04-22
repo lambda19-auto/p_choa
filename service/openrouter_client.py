@@ -16,8 +16,9 @@ class OpenRouterClient:
         }
 
     async def create_chat_completion(self, model: str, messages: list[dict], temperature: float = 0):
+        normalized_model = self._normalize_model_slug(model)
         payload = {
-            'model': model,
+            'model': normalized_model,
             'messages': messages,
             'temperature': temperature,
         }
@@ -32,3 +33,10 @@ class OpenRouterClient:
             data = response.json()
 
         return data['choices'][0]['message']['content']
+
+    @staticmethod
+    def _normalize_model_slug(model: str) -> str:
+        model = model.strip()
+        if '/' in model:
+            return model
+        return f'openai/{model}'
