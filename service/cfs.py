@@ -122,15 +122,17 @@ class CFS:
             if sheets.is_configured:
                 rows = await asyncio.to_thread(sheets.load_journal_rows)
                 if rows:
-                    header = rows[0]
-                    body = rows[1:] if len(rows) > 1 else []
                     expected_columns = ['note', 'date', 'sum', 'account', 'counterparty', 'category']
-                    if set(expected_columns).issubset(set(header)):
-                        frame = DataFrame(body, columns=header)
-                        for col in expected_columns:
-                            if col not in frame.columns:
-                                frame[col] = ''
-                        return frame[expected_columns]
+                    first_row = [str(cell).strip() for cell in rows[0]]
+                    has_header = set(expected_columns).issubset(set(first_row))
+                    body = rows[1:] if has_header else rows
+
+                    normalized_rows = []
+                    for item in body:
+                        normalized_rows.append((item + [''] * len(expected_columns))[:len(expected_columns)])
+
+                    frame = DataFrame(normalized_rows, columns=expected_columns)
+                    return frame
         except Exception:
             pass
 

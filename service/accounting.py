@@ -203,14 +203,17 @@ class Accounting(Core):
         try:
             sheets = GoogleSheetsStorage()
             if sheets.is_configured:
-                sheets.append_journal_row([
-                    row['note'],
-                    row['date'],
-                    row['sum'],
-                    row['account'],
-                    row['counterparty'],
-                    row['category'],
-                ])
+                await asyncio.to_thread(
+                    sheets.append_journal_row,
+                    [
+                        row['note'],
+                        row['date'],
+                        row['sum'],
+                        row['account'],
+                        row['counterparty'],
+                        row['category'],
+                    ],
+                )
         except Exception as e:
             logger.exception('Не удалось синхронизировать журнал в Google Sheets: %s', str(e))
 
