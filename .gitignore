@@ -16,3 +16,6 @@ logs/
 # IDE 
 .vscode/
 .idea/
+
+# other
+daily_limits.json
