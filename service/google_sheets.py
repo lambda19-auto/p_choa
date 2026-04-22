@@ -24,6 +24,8 @@ logger = get_logger(__name__)
 
 
 class GoogleSheetsStorage:
+    JOURNAL_HEADER = ['note', 'date', 'sum', 'account', 'counterparty', 'category']
+
     def __init__(self):
         load_dotenv(find_dotenv())
         self.credentials_path = getenv('GOOGLE_CREDENTIALS_JSON', 'google_credentials.json')
@@ -83,6 +85,16 @@ class GoogleSheetsStorage:
 
     def append_journal_row(self, row: list[Any]):
         spreadsheet_id, sheet_name = self._resolve_target(self.journal_url)
+        existing_rows = self.load_journal_rows()
+        if not existing_rows:
+            self.service.spreadsheets().values().append(
+                spreadsheetId=spreadsheet_id,
+                range=f'{sheet_name}!A:F',
+                valueInputOption='USER_ENTERED',
+                insertDataOption='INSERT_ROWS',
+                body={'values': [self.JOURNAL_HEADER]},
+            ).execute()
+
         body = {'values': [row]}
         self.service.spreadsheets().values().append(
             spreadsheetId=spreadsheet_id,
