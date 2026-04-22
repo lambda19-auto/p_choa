@@ -5,7 +5,7 @@ import os
 import httpx
 import asyncio
 from io import BytesIO
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 try:
     from .logging_setup import get_logger
@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 class Avatar:
 
     def __init__(self):
-        load_dotenv()
+        load_dotenv(find_dotenv())
         self.api_key = os.getenv('HEYGEN_API_KEY')
 
         if not self.api_key:

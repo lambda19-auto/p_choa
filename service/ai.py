@@ -1,7 +1,7 @@
 import tracemalloc
 from os import getenv
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from openai import AsyncOpenAI
 
 try:
@@ -23,7 +23,7 @@ tracemalloc.start()
 class ChoaAI():
 
     def __init__(self):
-        load_dotenv()
+        load_dotenv(find_dotenv())
         OPEN_AI_API_KEY = getenv('OPENAI_API_KEY')
         self.client = AsyncOpenAI(api_key=OPEN_AI_API_KEY)
         self.user_context = {}
