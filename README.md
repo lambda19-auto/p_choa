@@ -67,7 +67,7 @@ uv sync
 Обязательные ключи:
 
 ```
-OPENAI_API_KEY=
+OPENROUTER_API_KEY=
 BOT_TOKEN=
 HEYGEN_API_KEY=
 WEBHOOK_BASE_URL=
@@ -79,7 +79,7 @@ WEB_SERVER_PORT=8080
 
 Используемые сервисы:
 
-* OpenAI
+* OpenRouter
 * HeyGen
 
 #### Запуск
@@ -108,7 +108,7 @@ docker run -d \
   --name choa-bot \
   --restart unless-stopped \
   -p 8080:8080 \
-  -e OPENAI_API_KEY=your_key \
+  -e OPENROUTER_API_KEY=your_key \
   -e BOT_TOKEN=your_token \
   -e HEYGEN_API_KEY=your_token \
   -e WEBHOOK_BASE_URL=https://your-domain.example \
@@ -147,7 +147,7 @@ https://youtu.be/ibiy3S2DCNc
 
 * Python 3.13+
 * Токен Telegram-бота
-* OpenAI API Key
+* OpenRouter API Key
 * HeyGen API Key
 
 ---

@@ -243,13 +243,11 @@ class Accounting(Core):
             {'role':'assistant', 'content':assistant}
             ]
 
-        completion = await self.client.chat.completions.create(
-            model = self.model,
-            messages = messages,
-            temperature = self.temperature
+        answer = await self.client.create_chat_completion(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
         )
-
-        answer = completion.choices[0].message.content
 
         if self.verbose:
             logger.info("accounting: %s", answer)
