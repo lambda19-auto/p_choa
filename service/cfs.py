@@ -127,11 +127,20 @@ class CFS:
                     has_header = set(expected_columns).issubset(set(first_row))
                     body = rows[1:] if has_header else rows
 
-                    normalized_rows = []
-                    for item in body:
-                        normalized_rows.append((item + [''] * len(expected_columns))[:len(expected_columns)])
+                    if has_header:
+                        header = [str(cell).strip() for cell in rows[0]]
+                        normalized_rows = []
+                        for item in body:
+                            normalized_rows.append((item + [''] * len(header))[:len(header)])
 
-                    frame = DataFrame(normalized_rows, columns=expected_columns)
+                        frame = DataFrame(normalized_rows, columns=header)
+                        frame = frame.reindex(columns=expected_columns, fill_value='')
+                    else:
+                        normalized_rows = []
+                        for item in body:
+                            normalized_rows.append((item + [''] * len(expected_columns))[:len(expected_columns)])
+
+                        frame = DataFrame(normalized_rows, columns=expected_columns)
                     return frame
         except Exception:
             pass
