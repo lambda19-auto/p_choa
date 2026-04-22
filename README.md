@@ -70,6 +70,11 @@ uv sync
 OPENAI_API_KEY=
 BOT_TOKEN=
 HEYGEN_API_KEY=
+WEBHOOK_BASE_URL=
+WEBHOOK_PATH=/telegram/webhook
+WEBHOOK_SECRET_TOKEN=
+WEB_SERVER_HOST=0.0.0.0
+WEB_SERVER_PORT=8080
 ```
 
 Используемые сервисы:
@@ -79,9 +84,10 @@ HEYGEN_API_KEY=
 
 #### Запуск
 
+Бот запускается в режиме **webhook** (без long polling). Укажите публичный HTTPS URL в `WEBHOOK_BASE_URL` (например, через Nginx/Cloudflare tunnel), после чего запустите:
+
 ```bash
-cd service
-python3 -m telegram.bot 
+python3 -m service.telegram.bot
 ```
 
 ---
@@ -101,9 +107,15 @@ docker pull lambda19main/p_choa:latest
 docker run -d \
   --name choa-bot \
   --restart unless-stopped \
+  -p 8080:8080 \
   -e OPENAI_API_KEY=your_key \
   -e BOT_TOKEN=your_token \
   -e HEYGEN_API_KEY=your_token \
+  -e WEBHOOK_BASE_URL=https://your-domain.example \
+  -e WEBHOOK_PATH=/telegram/webhook \
+  -e WEBHOOK_SECRET_TOKEN=your_secret \
+  -e WEB_SERVER_HOST=0.0.0.0 \
+  -e WEB_SERVER_PORT=8080 \
   lambda19main/p_choa:latest
 ```
 
