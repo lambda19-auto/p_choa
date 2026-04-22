@@ -77,10 +77,22 @@ WEB_SERVER_HOST=0.0.0.0
 WEB_SERVER_PORT=8080
 ```
 
+Дополнительно для синхронизации журнала операций и ОДДС с Google Sheets:
+
+```
+GOOGLE_CREDENTIALS_JSON=google_credentials.json
+GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=...
+GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=...
+```
+
+> `GOOGLE_CREDENTIALS_JSON` — имя или путь к JSON-файлу сервисного аккаунта Google.
+> По вашему сценарию файл можно разместить прямо в корне проекта `p_choa/`.
+
 Используемые сервисы:
 
 * OpenRouter
 * HeyGen
+* Google Sheets API (опционально, для хранения журнала и отчета ОДДС)
 
 #### Запуск
 

@@ -9,9 +9,11 @@ import pandas as pd
 
 try:
     from .core_and_router import Core
+    from .google_sheets import GoogleSheetsStorage
     from .logging_setup import get_logger
 except ImportError:
     from core_and_router import Core
+    from google_sheets import GoogleSheetsStorage
     from logging_setup import get_logger
 
 
@@ -186,7 +188,7 @@ class Accounting(Core):
     async def append_to_df(self, lst, note):
         df = await self.load_df()
         index_row = len(df)
-        df.loc[index_row] = {
+        row = {
             'note':note,
             'date':lst[0],
             'sum':int(lst[1]),
@@ -194,7 +196,23 @@ class Accounting(Core):
             'counterparty':str(lst[3]),
             'category':str(lst[4])
         }
+        df.loc[index_row] = row
         await self.save_df(df)
+
+        # best-effort sync to Google Sheets journal
+        try:
+            sheets = GoogleSheetsStorage()
+            if sheets.is_configured:
+                sheets.append_journal_row([
+                    row['note'],
+                    row['date'],
+                    row['sum'],
+                    row['account'],
+                    row['counterparty'],
+                    row['category'],
+                ])
+        except Exception as e:
+            logger.exception('Не удалось синхронизировать журнал в Google Sheets: %s', str(e))
 
     # method activate
     async def activate(self):
