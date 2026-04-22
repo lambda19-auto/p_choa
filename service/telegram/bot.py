@@ -6,7 +6,7 @@ from os import getenv
 from pathlib import Path
 
 from aiohttp import web
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
@@ -28,7 +28,7 @@ except ImportError:
 
 logger = get_logger(__name__)
 
-load_dotenv()
+load_dotenv(find_dotenv())
 choa = ChoaAI()
 avatar = Avatar()
 BASE_DIR = Path(__file__).resolve().parent
