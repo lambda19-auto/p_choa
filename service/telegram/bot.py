@@ -88,11 +88,7 @@ async def cmd_download_cfs(message: Message) -> None:
     '''
     This handler receives messages with `/d_CFS` command
     '''
-    # rebuild CFS
-    cfs_agent = CFS()
-    await cfs_agent.build()
-
-    # send file
+    # send already prepared file
     document = FSInputFile(CFS.CFS_PATH)
     await message.bot.send_document(  # type:ignore
         chat_id=message.chat.id,
