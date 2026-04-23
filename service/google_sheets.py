@@ -71,12 +71,6 @@ class GoogleSheetsStorage:
         titles = [sheet.get('properties', {}).get('title', '') for sheet in sheets]
         normalized_to_title = {self._normalize_sheet_title(title): title for title in titles if title}
 
-        default_candidates = ('Лист1', 'Sheet1')
-        for candidate in default_candidates:
-            found = normalized_to_title.get(self._normalize_sheet_title(candidate))
-            if found:
-                return found
-
         purpose_keywords = {
             'journal': ('журнал', 'journal', 'операц'),
             'cfs': ('оддс', 'cfs', 'cashflow', 'cash flow', 'движениеденежныхсредств'),
@@ -88,6 +82,19 @@ class GoogleSheetsStorage:
                 normalized_title = self._normalize_sheet_title(title)
                 if any(self._normalize_sheet_title(keyword) in normalized_title for keyword in keywords):
                     return title
+
+        default_candidates_by_purpose = {
+            'journal': ('journal', 'журнал', 'Лист1', 'Sheet1'),
+            'cfs': ('cfs', 'оддс', 'Лист1', 'Sheet1'),
+        }
+        default_candidates = default_candidates_by_purpose.get(
+            (purpose or '').lower(),
+            ('Лист1', 'Sheet1'),
+        )
+        for candidate in default_candidates:
+            found = normalized_to_title.get(self._normalize_sheet_title(candidate))
+            if found:
+                return found
 
         return titles[0] or None
 
