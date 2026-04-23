@@ -113,6 +113,17 @@ Docker-образ доступен на Docker Hub.
 ```bash
 docker pull lambda19main/p_choa:latest
 ```
+Подготовьте локальную директорию `data` (на хосте), в которой будут:
+
+* `google_credentials.json` для Google Sheets
+* поддиректория `logs/` для логов контейнера
+
+```bash
+mkdir -p data/logs
+# Скопируйте ваш файл сервисного аккаунта:
+# cp /path/to/google_credentials.json data/google_credentials.json
+```
+
 Пример запуска:
 
 ```bash
@@ -120,6 +131,8 @@ docker run -d \
   --name choa-bot \
   --restart unless-stopped \
   -p 8080:8080 \
+  -v "$(pwd)/data:/p_choa/data" \
+  -v "$(pwd)/data/logs:/p_choa/logs" \
   -e OPENROUTER_API_KEY=your_key \
   -e BOT_TOKEN=your_token \
   -e HEYGEN_API_KEY=your_token \
@@ -128,8 +141,12 @@ docker run -d \
   -e WEBHOOK_SECRET_TOKEN=your_secret \
   -e WEB_SERVER_HOST=0.0.0.0 \
   -e WEB_SERVER_PORT=8080 \
+  -e GOOGLE_CREDENTIALS_JSON=/p_choa/data/google_credentials.json \
+  -e GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
+  -e GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
   lambda19main/p_choa:latest
 ```
+
 
 ---
 
