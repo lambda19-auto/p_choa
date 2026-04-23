@@ -4,6 +4,12 @@ from pathlib import Path
 import re
 
 import pandas as pd
+from pandas import DataFrame
+
+try:
+    from .google_sheets import GoogleSheetsStorage
+except ImportError:
+    from google_sheets import GoogleSheetsStorage
 
 
 class CFS:
@@ -109,7 +115,38 @@ class CFS:
         ],
     }
 
-    async def load_journal(self):
+    async def load_journal(self, prefer_local: bool = False):
+        expected_columns = ['note', 'date', 'sum', 'account', 'counterparty', 'category']
+
+        if not prefer_local:
+            # first preference: Google Sheets journal if configured
+            try:
+                sheets = GoogleSheetsStorage()
+                if sheets.is_configured:
+                    rows = await asyncio.to_thread(sheets.load_journal_rows)
+                    if rows:
+                        first_row = [str(cell).strip() for cell in rows[0]]
+                        has_header = set(expected_columns).issubset(set(first_row))
+                        body = rows[1:] if has_header else rows
+
+                        if has_header:
+                            header = [str(cell).strip() for cell in rows[0]]
+                            normalized_rows = []
+                            for item in body:
+                                normalized_rows.append((item + [''] * len(header))[:len(header)])
+
+                            frame = DataFrame(normalized_rows, columns=header)
+                            frame = frame.reindex(columns=expected_columns, fill_value='')
+                        else:
+                            normalized_rows = []
+                            for item in body:
+                                normalized_rows.append((item + [''] * len(expected_columns))[:len(expected_columns)])
+
+                            frame = DataFrame(normalized_rows, columns=expected_columns)
+                        return frame
+            except Exception:
+                pass
+
         try:
             return await asyncio.to_thread(pd.read_csv, self.JOURNAL_PATH)
         except Exception:
@@ -176,8 +213,8 @@ class CFS:
 
         return 0.0
 
-    async def build(self):
-        df = await self.load_journal()
+    async def build(self, prefer_local: bool = False):
+        df = await self.load_journal(prefer_local=prefer_local)
         grouped = self.build_grouped_amounts(df)
         opening_balance = self.load_opening_balance()
 
@@ -205,3 +242,11 @@ class CFS:
         with self.CFS_PATH.open('w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerows(rows)
+
+        # best-effort sync CFS report to Google Sheets
+        try:
+            sheets = GoogleSheetsStorage()
+            if sheets.is_configured:
+                await asyncio.to_thread(sheets.replace_cfs_rows, rows)
+        except Exception:
+            pass

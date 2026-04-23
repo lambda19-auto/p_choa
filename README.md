@@ -67,21 +67,39 @@ uv sync
 Обязательные ключи:
 
 ```
-OPENAI_API_KEY=
+OPENROUTER_API_KEY=
 BOT_TOKEN=
 HEYGEN_API_KEY=
+WEBHOOK_BASE_URL=
+WEBHOOK_PATH=/telegram/webhook
+WEBHOOK_SECRET_TOKEN=
+WEB_SERVER_HOST=0.0.0.0
+WEB_SERVER_PORT=8080
 ```
+
+Дополнительно для синхронизации журнала операций и ОДДС с Google Sheets:
+
+```
+GOOGLE_CREDENTIALS_JSON=google_credentials.json
+GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=...
+GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=...
+```
+
+> `GOOGLE_CREDENTIALS_JSON` — имя или путь к JSON-файлу сервисного аккаунта Google.
+> По вашему сценарию файл можно разместить прямо в корне проекта `p_choa/`.
 
 Используемые сервисы:
 
-* OpenAI
+* OpenRouter
 * HeyGen
+* Google Sheets API (опционально, для хранения журнала и отчета ОДДС)
 
 #### Запуск
 
+Бот запускается в режиме **webhook** (без long polling). Укажите публичный HTTPS URL в `WEBHOOK_BASE_URL` (например, через Nginx/Cloudflare tunnel), после чего запустите:
+
 ```bash
-cd service
-python3 -m telegram.bot 
+python3 -m service.telegram.bot
 ```
 
 ---
@@ -90,24 +108,45 @@ python3 -m telegram.bot
 
 Docker-образ доступен на Docker Hub.
 
+Загрузка образа:
+
+```bash
+docker pull lambda19main/p_choa:latest
+```
+Подготовьте локальную директорию `data` (на хосте), в которой будут:
+
+* `google_credentials.json` для Google Sheets
+* поддиректория `logs/` для логов контейнера
+
+```bash
+mkdir -p data/logs
+# Скопируйте ваш файл сервисного аккаунта:
+# cp /path/to/google_credentials.json data/google_credentials.json
+```
+
 Пример запуска:
 
 ```bash
 docker run -d \
   --name choa-bot \
   --restart unless-stopped \
-  -e OPENAI_API_KEY=your_key \
+  -p 8080:8080 \
+  -v "$(pwd)/data:/p_choa/data" \
+  -v "$(pwd)/data/logs:/p_choa/logs" \
+  -e OPENROUTER_API_KEY=your_key \
   -e BOT_TOKEN=your_token \
   -e HEYGEN_API_KEY=your_token \
+  -e WEBHOOK_BASE_URL=https://your-domain.example \
+  -e WEBHOOK_PATH=/telegram/webhook \
+  -e WEBHOOK_SECRET_TOKEN=your_secret \
+  -e WEB_SERVER_HOST=0.0.0.0 \
+  -e WEB_SERVER_PORT=8080 \
+  -e GOOGLE_CREDENTIALS_JSON=/p_choa/data/google_credentials.json \
+  -e GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
+  -e GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
   lambda19main/p_choa:latest
 ```
 
----
-
-## Демонстрация
-
-Видео с демонстрацией работы бота доступно по ссылке: 
-https://youtu.be/ibiy3S2DCNc
 
 ---
 
@@ -130,7 +169,7 @@ https://youtu.be/ibiy3S2DCNc
 
 * Python 3.13+
 * Токен Telegram-бота
-* OpenAI API Key
+* OpenRouter API Key
 * HeyGen API Key
 
 ---

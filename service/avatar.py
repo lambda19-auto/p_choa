@@ -5,13 +5,21 @@ import os
 import httpx
 import asyncio
 from io import BytesIO
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
+
+try:
+    from .logging_setup import get_logger
+except ImportError:
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Avatar:
 
     def __init__(self):
-        load_dotenv()
+        load_dotenv(find_dotenv())
         self.api_key = os.getenv('HEYGEN_API_KEY')
 
         if not self.api_key:
@@ -71,7 +79,7 @@ class Avatar:
                 raise Exception(f"HeyGen API error {resp.status_code}: {resp.text}")
 
             data = resp.json()
-            print("CREATE RESPONSE:", data)
+            logger.info("CREATE RESPONSE: %s", data)
 
             video_id = data.get('data', {}).get('video_id')
             if not video_id:
@@ -92,18 +100,20 @@ class Avatar:
                 r = await client.get(status_url, headers=self.headers)
 
                 if r.status_code != 200:
-                    print(f"[{attempt+1}] API error: {r.status_code} {r.text}")
+                    logger.error(
+                        "[%s] API error: %s %s", attempt + 1, r.status_code, r.text
+                    )
                     await asyncio.sleep(sleep_seconds)
                     continue
 
                 d = r.json()
-                print(f"[{attempt+1}] STATUS RESPONSE:", d)
+                logger.info("[%s] STATUS RESPONSE: %s", attempt + 1, d)
 
                 status = d.get('data', {}).get('status')
 
                 if status == 'completed':
                     video_url = d['data']['video_url']
-                    print("✅ Видео готово:", video_url)
+                    logger.info("Видео готово: %s", video_url)
                     break
 
                 elif status == 'failed':

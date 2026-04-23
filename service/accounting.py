@@ -8,9 +8,18 @@ from pathlib import Path
 import pandas as pd
 
 try:
+    from .cfs import CFS
     from .core_and_router import Core
+    from .google_sheets import GoogleSheetsStorage
+    from .logging_setup import get_logger
 except ImportError:
+    from cfs import CFS
     from core_and_router import Core
+    from google_sheets import GoogleSheetsStorage
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
 
 
 # create class accounting
@@ -181,7 +190,7 @@ class Accounting(Core):
     async def append_to_df(self, lst, note):
         df = await self.load_df()
         index_row = len(df)
-        df.loc[index_row] = {
+        row = {
             'note':note,
             'date':lst[0],
             'sum':int(lst[1]),
@@ -189,7 +198,32 @@ class Accounting(Core):
             'counterparty':str(lst[3]),
             'category':str(lst[4])
         }
+        df.loc[index_row] = row
         await self.save_df(df)
+
+        # best-effort sync to Google Sheets journal
+        try:
+            sheets = GoogleSheetsStorage()
+            if sheets.is_configured:
+                await asyncio.to_thread(
+                    sheets.append_journal_row,
+                    [
+                        row['note'],
+                        row['date'],
+                        row['sum'],
+                        row['account'],
+                        row['counterparty'],
+                        row['category'],
+                    ],
+                )
+        except Exception as e:
+            logger.exception('Не удалось синхронизировать журнал в Google Sheets: %s', str(e))
+
+        # always refresh local CFS report after local journal update
+        try:
+            await CFS().build(prefer_local=True)
+        except Exception as e:
+            logger.exception('Не удалось обновить ОДДС после записи операции: %s', str(e))
 
     # method activate
     async def activate(self):
@@ -238,16 +272,14 @@ class Accounting(Core):
             {'role':'assistant', 'content':assistant}
             ]
 
-        completion = await self.client.chat.completions.create(
-            model = self.model,
-            messages = messages,
-            temperature = self.temperature
+        answer = await self.client.create_chat_completion(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
         )
 
-        answer = completion.choices[0].message.content
-
         if self.verbose:
-            print('\n accounting: \n', answer)
+            logger.info("accounting: %s", answer)
 
         try:
             result = ast.literal_eval(answer)

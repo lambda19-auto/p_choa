@@ -8,8 +8,13 @@ import pandas as pd
 
 try:
     from .core_and_router import Core
+    from .logging_setup import get_logger
 except ImportError:
     from core_and_router import Core
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Analyze(Core):
@@ -77,15 +82,13 @@ class Analyze(Core):
             {'role':'user', 'content':user_for_analyze}
         ]
 
-        completion = await self.client.chat.completions.create(
-            model = self.model,
-            messages = messages,
-            temperature = self.temperature
+        answer = await self.client.create_chat_completion(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
         )
 
-        answer = completion.choices[0].message.content
-
         if self.verbose:
-            print('\n analyze: \n', answer)
+            logger.info("analyze: %s", answer)
 
         return answer
