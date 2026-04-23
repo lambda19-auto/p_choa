@@ -11,7 +11,12 @@ venv/
 
 # logs
 *.log
+logs/
 
 # IDE 
 .vscode/
 .idea/
+
+# other
+daily_limits.json
+credentials.json

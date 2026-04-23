@@ -1,6 +1,15 @@
 '''
 base class and agent Router
 '''
+try:
+    from .logging_setup import get_logger
+except ImportError:
+    from logging_setup import get_logger
+
+
+logger = get_logger(__name__)
+
+
 # create core for other classes
 class Core:
 
@@ -70,15 +79,13 @@ class Router(Core):
             {'role':'user', 'content':user_for_router}
         ]
 
-        completion = await self.client.chat.completions.create(
-            model = self.model,
-            messages = messages,
-            temperature = self.temperature
+        answer = await self.client.create_chat_completion(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
         )
 
-        answer = completion.choices[0].message.content
-
         if self.verbose:
-            print('\n router: \n', answer)
+            logger.info("router: %s", answer)
 
         return answer

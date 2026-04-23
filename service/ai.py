@@ -1,8 +1,7 @@
 import tracemalloc
 from os import getenv
 
-from dotenv import load_dotenv
-from openai import AsyncOpenAI
+from dotenv import find_dotenv, load_dotenv
 
 try:
     from .accounting import Accounting
@@ -10,12 +9,14 @@ try:
     from .ask import Ask
     from .core_and_router import Router
     from .joke import Joke
+    from .openrouter_client import OpenRouterClient
 except ImportError:
     from accounting import Accounting
     from analyze import Analyze
     from ask import Ask
     from core_and_router import Router
     from joke import Joke
+    from openrouter_client import OpenRouterClient
 tracemalloc.start()
 
 
@@ -23,9 +24,9 @@ tracemalloc.start()
 class ChoaAI():
 
     def __init__(self):
-        load_dotenv()
-        OPEN_AI_API_KEY = getenv('OPENAI_API_KEY')
-        self.client = AsyncOpenAI(api_key=OPEN_AI_API_KEY)
+        load_dotenv(find_dotenv())
+        OPEN_ROUTER_API_KEY = getenv('OPENROUTER_API_KEY')
+        self.client = OpenRouterClient(api_key=OPEN_ROUTER_API_KEY)
         self.user_context = {}
 
     # method ai-finance
