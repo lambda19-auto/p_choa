@@ -183,4 +183,3 @@ The project is built with an emphasis on:
 
 ---
 
-Made by lambda19.
