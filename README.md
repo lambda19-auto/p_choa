@@ -1,70 +1,70 @@
 # AI Telegram Finance
 
-`p_choa` — это финансовый ассистент, построенный как мультиагентная AI-система. Несколько интеллектуальных агентов работают совместно как единый механизм, анализируя запросы, обрабатывая финансовый контекст и формируя структурированные ответы.
+`p_choa` is a financial assistant built as a multi-agent AI system. Multiple intelligent agents work together as a single mechanism, analyzing requests, processing financial context, and producing structured responses.
 
-Проект ориентирован на модульность, прозрачную архитектуру и готовность к production.
-
----
-
-## Возможности
-
-* Мультиагентная архитектура
-* Финансовый анализ и структурированное рассуждение
-* Координация взаимодействия агентов
-* Готовый Docker-образ
-* Быстрая установка через `uv`
-* Конфигурация через переменные окружения
+The project is focused on modularity, transparent architecture, and production readiness.
 
 ---
 
-## Архитектура
+## Features
 
-Система построена вокруг нескольких AI-агентов, объединённых общим уровнем оркестрации.
-Каждый агент выполняет свою роль, а логика координации объединяет их выводы в финальный ответ.
-
-Общий поток работы:
-
-Пользователь → Telegram-бот → Оркестратор → Специализированные AI-агенты → Итоговый ответ
+* Multi-agent architecture
+* Financial analysis and structured reasoning
+* Agent interaction orchestration
+* Ready-to-use Docker image
+* Fast installation via `uv`
+* Configuration through environment variables
 
 ---
 
-## Установка
+## Architecture
 
-### Вариант 1 — Локально (для разработки)
+The system is built around several AI agents connected through a shared orchestration layer.
+Each agent performs its own role, while coordination logic combines their outputs into the final response.
 
-Требуется:
+General workflow:
+
+User → Telegram bot → Orchestrator → Specialized AI agents → Final response
+
+---
+
+## Installation
+
+### Option 1 — Local setup (for development)
+
+Requirements:
 
 * Python 3.13+
 * `uv`
 
-#### Клонируем репозиторий
+#### Clone the repository
 
 ```bash
 git clone https://github.com/lambda19-auto/p_choa.git
 ```
 
-#### Создание и активация виртуального окружения
+#### Create and activate a virtual environment
 
 ```bash
 uv venv
 source .venv/bin/activate.fish
 ```
 
-#### Установка зависимостей
+#### Install dependencies
 
 ```bash
 uv sync
 ```
 
-#### Переменные окружения
+#### Environment variables
 
-Создайте файл `.env` на основе:
+Create a `.env` file based on:
 
 ```
 .env.example
 ```
 
-Обязательные ключи:
+Required keys:
 
 ```
 OPENROUTER_API_KEY=
@@ -77,7 +77,7 @@ WEB_SERVER_HOST=0.0.0.0
 WEB_SERVER_PORT=8080
 ```
 
-Дополнительно для синхронизации журнала операций и ОДДС с Google Sheets:
+Additionally, for synchronizing the operations journal and CFS report with Google Sheets:
 
 ```
 GOOGLE_CREDENTIALS_JSON=google_credentials.json
@@ -85,18 +85,18 @@ GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=...
 GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=...
 ```
 
-> `GOOGLE_CREDENTIALS_JSON` — имя или путь к JSON-файлу сервисного аккаунта Google.
-> По вашему сценарию файл можно разместить прямо в корне проекта `p_choa/`.
+> `GOOGLE_CREDENTIALS_JSON` is the name or path to a Google service account JSON file.
+> Depending on your setup, you can place the file directly in the project root `p_choa/`.
 
-Используемые сервисы:
+Services used:
 
 * OpenRouter
 * HeyGen
-* Google Sheets API (опционально, для хранения журнала и отчета ОДДС)
+* Google Sheets API (optional, for storing the operations journal and CFS report)
 
-#### Запуск
+#### Run
 
-Бот запускается в режиме **webhook** (без long polling). Укажите публичный HTTPS URL в `WEBHOOK_BASE_URL` (например, через Nginx/Cloudflare tunnel), после чего запустите:
+The bot runs in **webhook** mode (without long polling). Set a public HTTPS URL in `WEBHOOK_BASE_URL` (for example, via Nginx/Cloudflare Tunnel), then run:
 
 ```bash
 python3 -m service.telegram.bot
@@ -104,27 +104,27 @@ python3 -m service.telegram.bot
 
 ---
 
-### Вариант 2 — Docker (рекомендуемый способ)
+### Option 2 — Docker (recommended)
 
-Docker-образ доступен на Docker Hub.
+The Docker image is available on Docker Hub.
 
-Загрузка образа:
+Pull the image:
 
 ```bash
-docker pull lambda19main/p_choa:latest
+docker pull lambda19main/p_choa:1.0.0
 ```
-Подготовьте локальную директорию `data` (на хосте), в которой будут:
+Prepare a local `data` directory (on the host), which should contain:
 
-* `google_credentials.json` для Google Sheets
-* поддиректория `logs/` для логов контейнера
+* `google_credentials.json` for Google Sheets
+* a `logs/` subdirectory for container logs
 
 ```bash
 mkdir -p data/logs
-# Скопируйте ваш файл сервисного аккаунта:
+# Copy your service account file:
 # cp /path/to/google_credentials.json data/google_credentials.json
 ```
 
-Пример запуска:
+Run example:
 
 ```bash
 docker run -d \
@@ -144,44 +144,43 @@ docker run -d \
   -e GOOGLE_CREDENTIALS_JSON=/p_choa/data/google_credentials.json \
   -e GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
   -e GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
-  lambda19main/p_choa:latest
+  lambda19main/p_choa:1.0.0
 ```
 
+---
+
+## Configuration
+
+Configuration is done via environment variables.
+
+For local development:
+
+* rename `.env.example` → `.env`
+
+For production:
+
+* pass variables using `-e` flags in Docker
+* or use your infrastructure's secret manager
 
 ---
 
-## Конфигурация
-
-Настройка осуществляется через переменные окружения.
-
-Для локальной разработки:
-
-* переименуйте `.env.example` → `.env`
-
-Для production:
-
-* передавайте переменные через флаг `-e` в Docker
-* либо используйте менеджер секретов вашей инфраструктуры
-
----
-
-## Требования
+## Requirements
 
 * Python 3.13+
-* Токен Telegram-бота
-* OpenRouter API Key
-* HeyGen API Key
+* Telegram bot token
+* OpenRouter API key
+* HeyGen API key
 
 ---
 
-## Разработка
+## Development
 
-Проект построен с акцентом на:
+The project is built with an emphasis on:
 
-* Чёткое разделение ролей агентов
-* Расширяемую логику оркестрации
-* Возможность дальнейшей интеграции финансовых инструментов
+* Clear separation of agent roles
+* Extensible orchestration logic
+* Future integration of financial tools
 
 ---
 
-AI-консультант компании Atomy от lambda19.
+Made by lambda19.
