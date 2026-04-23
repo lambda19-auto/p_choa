@@ -58,6 +58,44 @@ class GoogleSheetsStorage:
                 return props.get('title')
         return None
 
+    @staticmethod
+    def _normalize_sheet_title(title: str):
+        return re.sub(r'\s+', '', title).lower()
+
+    def _sheet_name_by_meaning(self, spreadsheet_id: str, purpose: str | None):
+        metadata = self.service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        sheets = metadata.get('sheets', [])
+        if not sheets:
+            return None
+
+        titles = [sheet.get('properties', {}).get('title', '') for sheet in sheets]
+        normalized_to_title = {self._normalize_sheet_title(title): title for title in titles if title}
+
+        default_candidates = ('Лист1', 'Sheet1')
+        for candidate in default_candidates:
+            found = normalized_to_title.get(self._normalize_sheet_title(candidate))
+            if found:
+                return found
+
+        purpose_keywords = {
+            'journal': ('журнал', 'journal', 'операц'),
+            'cfs': ('оддс', 'cfs', 'cashflow', 'cash flow', 'движениеденежныхсредств'),
+        }
+        keywords = purpose_keywords.get((purpose or '').lower(), ())
+
+        if keywords:
+            for title in titles:
+                normalized_title = self._normalize_sheet_title(title)
+                if any(self._normalize_sheet_title(keyword) in normalized_title for keyword in keywords):
+                    return title
+
+        return titles[0] or None
+
+    @staticmethod
+    def _a1_range(sheet_name: str, cells: str):
+        escaped_name = sheet_name.replace("'", "''")
+        return f"'{escaped_name}'!{cells}"
+
     @property
     def service(self):
         if self._service is not None:
@@ -72,11 +110,14 @@ class GoogleSheetsStorage:
         self._service = build('sheets', 'v4', credentials=creds)
         return self._service
 
-    def _resolve_target(self, url_or_id: str):
+    def _resolve_target(self, url_or_id: str, purpose: str | None = None):
         spreadsheet_id = self._extract_sheet_id(url_or_id)
         gid = self._extract_gid(url_or_id)
         if gid is None:
-            return spreadsheet_id, 'Лист1'
+            sheet_name = self._sheet_name_by_meaning(spreadsheet_id, purpose)
+            if not sheet_name:
+                raise RuntimeError(f'Не найден ни один лист в таблице {spreadsheet_id}')
+            return spreadsheet_id, sheet_name
 
         sheet_name = self._sheet_name_by_gid(spreadsheet_id, gid)
         if not sheet_name:
@@ -84,12 +125,12 @@ class GoogleSheetsStorage:
         return spreadsheet_id, sheet_name
 
     def append_journal_row(self, row: list[Any]):
-        spreadsheet_id, sheet_name = self._resolve_target(self.journal_url)
+        spreadsheet_id, sheet_name = self._resolve_target(self.journal_url, purpose='journal')
         existing_rows = self.load_journal_rows()
         if not existing_rows:
             self.service.spreadsheets().values().append(
                 spreadsheetId=spreadsheet_id,
-                range=f'{sheet_name}!A:F',
+                range=self._a1_range(sheet_name, 'A:F'),
                 valueInputOption='USER_ENTERED',
                 insertDataOption='INSERT_ROWS',
                 body={'values': [self.JOURNAL_HEADER]},
@@ -98,31 +139,31 @@ class GoogleSheetsStorage:
         body = {'values': [row]}
         self.service.spreadsheets().values().append(
             spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!A:F',
+            range=self._a1_range(sheet_name, 'A:F'),
             valueInputOption='USER_ENTERED',
             insertDataOption='INSERT_ROWS',
             body=body,
         ).execute()
 
     def load_journal_rows(self):
-        spreadsheet_id, sheet_name = self._resolve_target(self.journal_url)
+        spreadsheet_id, sheet_name = self._resolve_target(self.journal_url, purpose='journal')
         result = self.service.spreadsheets().values().get(
             spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!A:F',
+            range=self._a1_range(sheet_name, 'A:F'),
         ).execute()
         return result.get('values', [])
 
     def replace_cfs_rows(self, rows: list[list[Any]]):
-        spreadsheet_id, sheet_name = self._resolve_target(self.cfs_url)
+        spreadsheet_id, sheet_name = self._resolve_target(self.cfs_url, purpose='cfs')
         self.service.spreadsheets().values().clear(
             spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!A:Z',
+            range=self._a1_range(sheet_name, 'A:Z'),
             body={},
         ).execute()
 
         self.service.spreadsheets().values().update(
             spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!A1',
+            range=self._a1_range(sheet_name, 'A1'),
             valueInputOption='USER_ENTERED',
             body={'values': rows},
         ).execute()
