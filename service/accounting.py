@@ -8,10 +8,12 @@ from pathlib import Path
 import pandas as pd
 
 try:
+    from .cfs import CFS
     from .core_and_router import Core
     from .google_sheets import GoogleSheetsStorage
     from .logging_setup import get_logger
 except ImportError:
+    from cfs import CFS
     from core_and_router import Core
     from google_sheets import GoogleSheetsStorage
     from logging_setup import get_logger
@@ -216,6 +218,13 @@ class Accounting(Core):
                 )
         except Exception as e:
             logger.exception('Не удалось синхронизировать журнал в Google Sheets: %s', str(e))
+
+        # best-effort rebuild of CFS after each journal operation
+        try:
+            cfs_agent = CFS()
+            await cfs_agent.build()
+        except Exception as e:
+            logger.exception('Не удалось обновить ОДДС после записи операции: %s', str(e))
 
     # method activate
     async def activate(self):
