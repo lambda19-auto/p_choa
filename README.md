@@ -67,14 +67,25 @@ Create a `.env` file based on:
 Required keys:
 
 ```
-OPENROUTER_API_KEY=
-BOT_TOKEN=
-HEYGEN_API_KEY=
-WEBHOOK_BASE_URL=
+# OpenRouter
+OPENROUTER_API_KEY=your_api_key
+
+# Telegram Bot
+BOT_TOKEN=your_token
+WEBHOOK_BASE_URL=your_domain
 WEBHOOK_PATH=/telegram/webhook
-WEBHOOK_SECRET_TOKEN=
+WEBHOOK_SECRET_TOKEN=your_strong_password
 WEB_SERVER_HOST=0.0.0.0
 WEB_SERVER_PORT=8080
+
+# HeyGen
+HEYGEN_API_KEY=your_api_key
+
+# Google Sheets API
+# JSON key file should be placed in repository root (p_choa/)
+GOOGLE_CREDENTIALS_JSON=google_credentials.json
+GOOGLE_JOURNAL_SHEET_URL=your_table
+GOOGLE_CFS_SHEET_URL=your_table
 ```
 
 Additionally, for synchronizing the operations journal and CFS report with Google Sheets:
