@@ -201,9 +201,10 @@ class Accounting(Core):
         df.loc[index_row] = row
         await self.save_df(df)
 
+        sheets = GoogleSheetsStorage()
+
         # best-effort sync to Google Sheets journal
         try:
-            sheets = GoogleSheetsStorage()
             if sheets.is_configured:
                 await asyncio.to_thread(
                     sheets.append_journal_row,
@@ -221,9 +222,17 @@ class Accounting(Core):
 
         # always refresh local CFS report after local journal update
         try:
-            await CFS().build(prefer_local=True)
+            cfs_rows = await CFS().build(prefer_local=True, sync_google=False)
         except Exception as e:
             logger.exception('Не удалось обновить ОДДС после записи операции: %s', str(e))
+            return
+
+        # and then push fresh CFS to Google Sheets
+        try:
+            if sheets.is_configured:
+                await asyncio.to_thread(sheets.replace_cfs_rows, cfs_rows)
+        except Exception as e:
+            logger.exception('Не удалось обновить ОДДС в Google Sheets: %s', str(e))
 
     # method activate
     async def activate(self):
