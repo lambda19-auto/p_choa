@@ -142,20 +142,20 @@ docker run -d \
   --name choa-bot \
   --restart unless-stopped \
   -p 8080:8080 \
-  -v "$(pwd)/data:/p_choa/data" \
+  -v "$(pwd)/data/credentials.json:/p_choa/credentials.json" \
   -v "$(pwd)/data/logs:/p_choa/logs" \
   -e OPENROUTER_API_KEY=your_key \
   -e BOT_TOKEN=your_token \
-  -e HEYGEN_API_KEY=your_token \
+  -e HEYGEN_API_KEY=your_key \
   -e WEBHOOK_BASE_URL=https://your-domain.example \
   -e WEBHOOK_PATH=/telegram/webhook \
   -e WEBHOOK_SECRET_TOKEN=your_secret \
   -e WEB_SERVER_HOST=0.0.0.0 \
   -e WEB_SERVER_PORT=8080 \
-  -e GOOGLE_CREDENTIALS_JSON=/p_choa/data/google_credentials.json \
-  -e GOOGLE_JOURNAL_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
-  -e GOOGLE_CFS_SHEET_URL=https://docs.google.com/spreadsheets/d/.../edit#gid=... \
-  lambda19main/p_choa:1.0.0
+  -e GOOGLE_CREDENTIALS_JSON=/p_choa/credentials.json \
+  -e GOOGLE_JOURNAL_SHEET_URL="https://docs.google.com/spreadsheets/d/.../edit#gid=..." \
+  -e GOOGLE_CFS_SHEET_URL="https://docs.google.com/spreadsheets/d/.../edit#gid=..." \
+  p_choa:1.0.0
 ```
 
 ---
