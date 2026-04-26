@@ -213,7 +213,7 @@ class CFS:
 
         return 0.0
 
-    async def build(self, prefer_local: bool = False):
+    async def build(self, prefer_local: bool = False, sync_google: bool = True):
         df = await self.load_journal(prefer_local=prefer_local)
         grouped = self.build_grouped_amounts(df)
         opening_balance = self.load_opening_balance()
@@ -244,9 +244,12 @@ class CFS:
             writer.writerows(rows)
 
         # best-effort sync CFS report to Google Sheets
-        try:
-            sheets = GoogleSheetsStorage()
-            if sheets.is_configured:
-                await asyncio.to_thread(sheets.replace_cfs_rows, rows)
-        except Exception:
-            pass
+        if sync_google:
+            try:
+                sheets = GoogleSheetsStorage()
+                if sheets.is_configured:
+                    await asyncio.to_thread(sheets.replace_cfs_rows, rows)
+            except Exception:
+                pass
+
+        return rows
