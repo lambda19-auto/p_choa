@@ -32,10 +32,23 @@ class GoogleSheetsStorage:
         self.journal_url = getenv('GOOGLE_JOURNAL_SHEET_URL', '')
         self.cfs_url = getenv('GOOGLE_CFS_SHEET_URL', '')
         self._service = None
+        self._log_credentials_presence(context='init')
 
     @property
     def is_configured(self):
-        return bool(self.journal_url and self.cfs_url and Path(self.credentials_path).exists())
+        credentials_exist = Path(self.credentials_path).exists()
+        self._log_credentials_presence(context='config-check', credentials_exist=credentials_exist)
+        return bool(self.journal_url and self.cfs_url and credentials_exist)
+
+    def _log_credentials_presence(self, context: str, credentials_exist: bool | None = None):
+        credentials_file = Path(self.credentials_path)
+        exists = credentials_file.exists() if credentials_exist is None else credentials_exist
+        logger.info(
+            'Google credentials file check (%s): path=%s exists_in_container=%s',
+            context,
+            credentials_file.resolve(),
+            exists,
+        )
 
     def _extract_sheet_id(self, url_or_id: str):
         if '/spreadsheets/d/' in url_or_id:
@@ -107,6 +120,7 @@ class GoogleSheetsStorage:
     def service(self):
         if self._service is not None:
             return self._service
+        self._log_credentials_presence(context='service-init')
         if not self.is_configured:
             raise RuntimeError('Google Sheets is not configured')
         if Credentials is None or build is None:
